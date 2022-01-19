@@ -33,7 +33,7 @@ object NetworkModule {
 
     suspend fun getData() {
         val data = webservice.getData()
-        Log.d(TAG, "++++ Data: $data")
+        Log.d(TAG, "Data: $data")
     }
 
     private const val TAG = "NetworkModule"
@@ -42,11 +42,11 @@ object NetworkModule {
 
 class ResponseInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        Log.e("+++", "++++ INTECEPTED!!!!: " + chain.request().url)
+        Log.e(TAG, "Intercepted URL: " + chain.request().url)
         val response = chain.proceed(chain.request())
         val respAsJson = Gson().fromJson(response.body?.string(), com.sandymist.helloretrofit.Response::class.java)
         val modifiedData = respAsJson.data.map {
-            Fruit(name = it.name.uppercase() + "!!!!")
+            Fruit(name = it.name.uppercase())
         }
         val modifiedRespAsJson = respAsJson.copy(data = modifiedData)
         val modifiedResp = Gson().toJson(modifiedRespAsJson)
@@ -54,5 +54,9 @@ class ResponseInterceptor: Interceptor {
         return response.newBuilder()
             .body(modifiedBody)
             .build()
+    }
+
+    companion object {
+        private const val TAG = "ResponseInterceptor"
     }
 }
