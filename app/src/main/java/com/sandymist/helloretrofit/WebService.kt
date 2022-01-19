@@ -1,8 +1,9 @@
 package com.sandymist.helloretrofit
 
+import com.sandymist.helloretrofit.model.ContactsResponse
 import retrofit2.http.GET
 
 interface Webservice {
-    @GET("/")
-    suspend fun getData(): Response
+    @GET("/contacts")
+    suspend fun getContacts(): ContactsResponse
 }

@@ -2,6 +2,7 @@ package com.sandymist.helloretrofit
 
 import android.util.Log
 import com.google.gson.Gson
+import com.sandymist.helloretrofit.model.ContactsResponse
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Response
@@ -32,21 +33,21 @@ object NetworkModule {
     }
 
     suspend fun getData() {
-        val data = webservice.getData()
-        Log.d(TAG, "Data: $data")
+        val data = webservice.getContacts()
+        Log.d(TAG, "Contacts Data: $data")
     }
 
     private const val TAG = "NetworkModule"
-    private const val BASE_URL = "http://10.0.2.2:8000"
+    private const val BASE_URL = "http://10.0.2.2:8000/"
 }
 
 class ResponseInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         Log.e(TAG, "Intercepted URL: " + chain.request().url)
         val response = chain.proceed(chain.request())
-        val respAsJson = Gson().fromJson(response.body?.string(), com.sandymist.helloretrofit.Response::class.java)
-        val modifiedData = respAsJson.data.map {
-            Fruit(name = it.name.uppercase())
+        val respAsJson = Gson().fromJson(response.body?.string(), ContactsResponse::class.java)
+        val modifiedData = respAsJson.data?.map {
+            it?.copy(lastName = it.lastName?.uppercase())
         }
         val modifiedRespAsJson = respAsJson.copy(data = modifiedData)
         val modifiedResp = Gson().toJson(modifiedRespAsJson)
