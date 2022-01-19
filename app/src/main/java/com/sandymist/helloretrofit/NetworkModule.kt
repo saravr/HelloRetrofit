@@ -1,7 +1,11 @@
 package com.sandymist.helloretrofit
 
 import android.util.Log
-import okhttp3.OkHttpClient
+import com.google.gson.Gson
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Response
+import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,9 +17,10 @@ object NetworkModule {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
 
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .build()
+        val builder = OkHttpClient.Builder()
+        builder.addInterceptor(ResponseInterceptor())
+        builder.addInterceptor(loggingInterceptor)
+        val okHttpClient = builder.build()
 
         val retrofit = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
@@ -28,9 +33,26 @@ object NetworkModule {
 
     suspend fun getData() {
         val data = webservice.getData()
-        Log.d(TAG, "Data: $data")
+        Log.d(TAG, "++++ Data: $data")
     }
 
     private const val TAG = "NetworkModule"
     private const val BASE_URL = "http://10.0.2.2:8000"
+}
+
+class ResponseInterceptor: Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        Log.e("+++", "++++ INTECEPTED!!!!: " + chain.request().url)
+        val response = chain.proceed(chain.request())
+        val respAsJson = Gson().fromJson(response.body?.string(), com.sandymist.helloretrofit.Response::class.java)
+        val modifiedData = respAsJson.data.map {
+            Fruit(name = it.name.uppercase() + "!!!!")
+        }
+        val modifiedRespAsJson = respAsJson.copy(data = modifiedData)
+        val modifiedResp = Gson().toJson(modifiedRespAsJson)
+        val modifiedBody = modifiedResp.toResponseBody("application/json".toMediaType())
+        return response.newBuilder()
+            .body(modifiedBody)
+            .build()
+    }
 }
