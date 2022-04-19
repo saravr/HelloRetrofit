@@ -2,18 +2,15 @@ package com.sandymist.helloretrofit
 
 import android.util.Log
 import com.google.gson.Gson
+import com.jayway.jsonpath.DocumentContext
 import com.jayway.jsonpath.JsonPath
 import com.sandymist.helloretrofit.model.ContactsResponse
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.jayway.jsonpath.DocumentContext
-
-
 
 
 object NetworkModule {
